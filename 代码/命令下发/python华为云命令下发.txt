@@ -1,0 +1,55 @@
+from huaweicloudsdkcore.exceptions import exceptions
+from huaweicloudsdkcore.region.region import Region
+from huaweicloudsdkiotda.v5 import IoTDAClient, CreateCommandRequest, DeviceCommandRequest
+from huaweicloudsdkcore.auth.credentials import BasicCredentials, DerivedCredentials
+
+if __name__ == "__main__":
+    # 认证信息
+    ak = "BHV9N5RYXZP5ZWO0JAVK"
+    sk = "gcoUuOD6HllHi76j1IvPMEc0mb3WHeI26Yg4SsFZ"
+    project_id = "4e878bb1d8054bb5b1dafe8096e90e42"
+    
+    # 区域信息
+    region_id = "cn-north-4"
+    endpoint = "https://9d1b8ed274.st1.iotda-app.cn-north-4.myhuaweicloud.com"
+    
+    # 标准版/企业版：需自行创建Region对象
+    REGION = Region(region_id, endpoint)
+
+    # 创建认证
+    credentials = BasicCredentials(ak, sk, project_id)
+
+    # 标准版/企业版需要使用衍生算法，基础版请删除配置"with_derived_predicate"
+    credentials.with_derived_predicate(DerivedCredentials.get_default_derived_predicate())
+
+    # 创建IoTDAClient实例并初始化
+    client = IoTDAClient.new_builder() \
+        .with_credentials(credentials) \
+        .with_region(REGION) \
+        .build()
+
+    try:
+        # 实例化请求对象
+        request = CreateCommandRequest()
+        request.device_id = "658194fe585c81787ad7cfee_20231219"
+        
+        # 请求体
+        request.body = DeviceCommandRequest(
+            command_name="command_total",
+            paras='{"Light":"ON"}'
+        )
+        
+        # 打印请求对象
+        print(request)
+        
+        # 调用创建命令接口（注意这里是create_command而不是list_devices）
+        response = client.create_command(request)
+        
+        # 打印响应对象
+        print(response)
+    
+    except exceptions.ClientRequestException as e:
+        print(e.status_code)
+        print(e.request_id)
+        print(e.error_code)
+        print(e.error_msg)
